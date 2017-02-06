@@ -6,7 +6,20 @@ Note: Remote state management hasn't been configured yet. `terraform apply` at y
 
 ## Description
 
-The `environment` folder contains a hierarchy of environments to be managed by this app. Create a new folder for each environment type (first level) and region (second level).
+The `environment` folder contains a hierarchy of environments to be managed by this app. Create a new folder for each environment type (first level) and region (second level) like so:
+
+    .
+    ├── README.md
+    ├── environment
+    │   ├── production
+    │   │   └── ap-southeast-2
+    │   └── test
+    │       └── ap-southeast-2
+    │           ├── main.tf
+    │           └── terraform.tfvars
+    └── strata_snap.tf
+
+Create a main.tf and terraform.tfvars as per the example below, and supply the appropriate values for your environment.
 
 ## How to use
 

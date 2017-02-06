@@ -1,4 +1,5 @@
 environment_name = "test1"
+region = "ap-southeast-2"
 vpc_cidr = "10.70.0.0/16"
 availability_zones = ["ap-southeast-2a","ap-southeast-2b","ap-southeast-2c"]
 public_subnets = ["10.70.0.0/22", "10.70.4.0/22", "10.70.8.0/22"]

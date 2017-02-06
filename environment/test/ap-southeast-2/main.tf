@@ -1,4 +1,5 @@
 variable "environment_name" { }
+variable "region" { }
 variable "vpc_cidr" { }
 variable "availability_zones" { type = "list" }
 variable "public_subnets" { type = "list" }
@@ -7,6 +8,10 @@ variable "number_of_cassandra_seeds" { }
 variable "cassandra_instance_type" { }
 variable "cassandra_seed_ips" { type = "list" }
 variable "ssh_public_key" { }
+
+provider aws {
+  region = "${var.region}"
+}
 
 module "strata_snap" {
   source = "../../../"
