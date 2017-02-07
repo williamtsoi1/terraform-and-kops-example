@@ -2,7 +2,8 @@
 
 This repository is used to manage the infrastructure of stratasnap.
 
-Note: Remote state management hasn't been configured yet. `terraform apply` at your own peril!
+Remote state management is implemented via [Terragrunt](https://github.com/gruntwork-io/terragrunt)
+
 
 ## Description
 
@@ -11,6 +12,9 @@ The purpose of this repository is to simply act as a configuration store, as wel
 ## Prerequisites
 - Install [Terraform](http://terraform.io)
 - Install [Terragrunt](https://github.com/gruntwork-io/terragrunt)
+- AWS IAM credentials need to be set up on your environment. This IAM user will need access to the following:
+  - Ability to manage resources as defined in the Terraform template (eg. ec2, vpc, subnet creation)
+  - Access to S3 and DynamoDB in order to access the remote state file and the distributed locks.
 
 ## How to use
 
