@@ -11,10 +11,10 @@ variable "cassandra_seed_ips" { type = "list" }
 variable "ssh_public_key" { }
 
 # optional variables with defaults
-variable "enable_dns_hostnames" { default = true }
-variable "enable_dns_support" { default = true }
-variable "enable_nat_gateway" { default = true }
-variable "map_public_ip_on_launch" { default = false }
+variable "enable_dns_hostnames" { default = "true" }
+variable "enable_dns_support" { default = "true" }
+variable "enable_nat_gateway" { default = "true" }
+variable "map_public_ip_on_launch" { default = "false" }
 
 module "vpc" {
   source = "github.com/terraform-community-modules/tf_aws_vpc"
