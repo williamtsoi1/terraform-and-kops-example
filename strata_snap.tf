@@ -1,4 +1,3 @@
-
 # variables required to be injected into module
 variable "environment_name" { }
 variable "vpc_cidr" { }
@@ -35,9 +34,16 @@ module "cassandra-seeds" {
   cassandra_cluster_name = "${var.environment_name} Cassandra Cluster"
   cassandra_seed_ips = "${var.cassandra_seed_ips}"
   instance_type = "${var.cassandra_instance_type}"
-  #private_subnet_ids = ["subnet-603ab516", "subnet-f02c4b94", "subnet-65c66f3c"]
   private_subnet_ids = "${module.vpc.private_subnets}"
   ssh_public_key = "${var.ssh_public_key}"
   vpc_id = "${module.vpc.vpc_id}"
   vpc_cidr = "${var.vpc_cidr}"
+}
+
+module "bastion" {
+  source = "github.com/devop5/terraform-bastion"
+  vpc_id = "${module.vpc.vpc_id}"
+  public_subnet_ids = "${module.vpc.public_subnets}"
+  ssh_public_key = "${var.ssh_public_key}"
+  stack_name = "${var.environment_name}"
 }
