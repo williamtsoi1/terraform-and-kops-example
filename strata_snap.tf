@@ -8,6 +8,7 @@ variable "number_of_cassandra_seeds" { }
 variable "cassandra_instance_type" { }
 variable "cassandra_seed_ips" { type = "list" }
 variable "ssh_public_key" { }
+variable "bastion_bucket_name" { }
 
 # optional variables with defaults
 variable "enable_dns_hostnames" { default = "true" }
@@ -16,7 +17,7 @@ variable "enable_nat_gateway" { default = "true" }
 variable "map_public_ip_on_launch" { default = "false" }
 
 module "vpc" {
-  source = "github.com/terraform-community-modules/tf_aws_vpc"
+  source = "github.com/williamtsoi1/tf_aws_vpc"
   name = "${var.environment_name}-stratasnap-vpc"
   cidr = "${var.vpc_cidr}"
   private_subnets = "${var.private_subnets}"
@@ -25,6 +26,7 @@ module "vpc" {
   enable_dns_hostnames = "${var.enable_dns_hostnames}"
   enable_dns_support = "${var.enable_dns_support}"
   enable_nat_gateway = "${var.enable_nat_gateway}"
+  enable_s3_endpoint = true
   map_public_ip_on_launch = "${var.map_public_ip_on_launch}"
 }
 
@@ -38,6 +40,7 @@ module "cassandra-seeds" {
   ssh_public_key = "${var.ssh_public_key}"
   vpc_id = "${module.vpc.vpc_id}"
   vpc_cidr = "${var.vpc_cidr}"
+  depends_id = "${module.vpc.depends_id}"
 }
 
 module "bastion" {
@@ -46,4 +49,6 @@ module "bastion" {
   public_subnet_ids = "${module.vpc.public_subnets}"
   ssh_public_key = "${var.ssh_public_key}"
   stack_name = "${var.environment_name}"
+  s3_bucket_name = "${var.bastion_bucket_name}"
+  depends_id = "${module.vpc.depends_id}"
 }

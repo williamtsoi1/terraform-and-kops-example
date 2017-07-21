@@ -8,6 +8,7 @@ variable "number_of_cassandra_seeds" { }
 variable "cassandra_instance_type" { }
 variable "cassandra_seed_ips" { type = "list" }
 variable "ssh_public_key" { }
+variable "bastion_bucket_name" { }
 
 provider aws {
   region = "${var.region}"
@@ -24,4 +25,9 @@ module "strata_snap" {
   cassandra_instance_type = "${var.cassandra_instance_type}"
   cassandra_seed_ips = "${var.cassandra_seed_ips}"
   ssh_public_key = "${var.ssh_public_key}"
+  bastion_bucket_name = "${var.bastion_bucket_name}"
+}
+
+terraform {
+  backend "s3" {}
 }
