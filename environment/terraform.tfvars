@@ -4,7 +4,7 @@ terragrunt = {
     backend = "s3"
     config {
       encrypt = true
-      bucket = "devop5-terragrunt-strata-snap"
+      bucket = "terragrunt-strata-snap-remote-state"
       key = "${path_relative_to_include()}/terraform.tfstate"
       region = "ap-southeast-2"
     }
