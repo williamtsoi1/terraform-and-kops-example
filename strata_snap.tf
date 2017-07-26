@@ -1,6 +1,8 @@
 # variables required to be injected into module
 variable "environment_name" { }
 variable "snap_domain_name" { }
+variable "snap_full_fqdn" { }
+variable "r53_zone_id" { }
 variable "vpc_cidr" { }
 variable "availability_zones" { type = "list" }
 variable "public_subnets" { type = "list" }
@@ -46,30 +48,19 @@ module "cassandra-seeds" {
 
 module "bastion" {
   source = "github.com/devop5/terraform-bastion"
-  instance_type = "t2.micro"
   vpc_id = "${module.vpc.vpc_id}"
   public_subnet_ids = "${module.vpc.public_subnets}"
+  r53_zone_id = "${var.r53_zone_id}"
+  r53_domain = "${var.snap_full_fqdn}"
   ssh_public_key = "${var.ssh_public_key}"
   stack_name = "${var.environment_name}"
   s3_bucket_name = "${var.bastion_bucket_name}"
   depends_id = "${module.vpc.depends_id}"
 }
 
-resource "aws_route53_zone" "environment_subdomain" {
-  name          = "${var.environment_name}.${var.snap_domain_name}"
-  force_destroy = true
-  count         = "${var.environment_name == "production" ? 0 : 1}"
-}
-
-resource "aws_route53_zone" "root_domain" {
-  name          = "${var.snap_domain_name}"
-  force_destroy = true
-  count         = "${var.environment_name == "production" ? 1 : 0}"
-}
-
 resource "aws_s3_bucket" "k8s_state_store" {
   region = "${data.aws_region.current.name}"
-  bucket = "${var.environment_name}-${var.snap_domain_name}-k8s-state-store"
+  bucket = "${var.snap_full_fqdn}-k8s-state-store"
   acl    = "private"
   force_destroy = true
 }
@@ -85,14 +76,13 @@ kops create cluster \
     --master-zones ${join(",", var.availability_zones)} \
     --zones ${join(",", var.availability_zones)} \
     --topology private \
-    --dns-zone ${aws_route53_zone.environment_subdomain.id} \
-    --dns private \
+    --dns-zone ${var.r53_zone_id} \
     --networking calico \
     --vpc ${module.vpc.vpc_id} \
     --target=terraform \
     --out=./kubernetes \
-    --state s3://${var.environment_name}-${var.snap_domain_name}-k8s-state-store \
-    --name kubernetes.${var.environment_name}.${var.snap_domain_name}
+    --state s3://${var.snap_full_fqdn}-k8s-state-store \
+    --name kubernetes.${var.snap_full_fqdn}
 EOF
   }
 }

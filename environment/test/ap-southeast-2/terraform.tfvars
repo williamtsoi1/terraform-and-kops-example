@@ -1,6 +1,8 @@
 # Environment-specific configurations here
 environment_name = "test1"
 snap_domain_name = "stratasnap.com.au"
+snap_full_fqdn = "test1.stratasnap.com.au"
+r53_zone_id = "Z7TT3X0SRJE0T"
 region = "ap-southeast-2"
 vpc_cidr = "10.70.0.0/16"
 availability_zones = ["ap-southeast-2a","ap-southeast-2b","ap-southeast-2c"]
