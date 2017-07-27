@@ -1,6 +1,5 @@
-# This is an example of how to put public keys into S3 bucket and manage them in Terraform
 variable "ssh_public_key_names" {
-  default = "admin"
+  default = "kha,kien,william"
 }
 
 resource "aws_s3_bucket" "ssh_public_keys" {
