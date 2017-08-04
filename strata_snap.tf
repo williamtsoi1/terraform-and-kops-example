@@ -34,16 +34,20 @@ module "vpc" {
 }
 
 module "cassandra-seeds" {
-  source = "github.com/devop5/terraform-cassandra-seeds"
-  number_of_seeds = "${var.number_of_cassandra_seeds}"
+  source                 = "github.com/devop5/terraform-cassandra-seeds"
+  number_of_seeds        = "${var.number_of_cassandra_seeds}"
   cassandra_cluster_name = "${var.environment_name} Cassandra Cluster"
-  cassandra_seed_ips = "${var.cassandra_seed_ips}"
-  instance_type = "${var.cassandra_instance_type}"
-  private_subnet_ids = "${module.vpc.private_subnets}"
-  ssh_public_key = "${var.ssh_public_key}"
-  vpc_id = "${module.vpc.vpc_id}"
-  vpc_cidr = "${var.vpc_cidr}"
-  depends_id = "${module.vpc.depends_id}"
+  cassandra_seed_ips     = "${var.cassandra_seed_ips}"
+  instance_type          = "${var.cassandra_instance_type}"
+  private_subnet_ids     = "${module.vpc.private_subnets}"
+  ssh_public_key         = "${var.ssh_public_key}"
+  vpc_id                 = "${module.vpc.vpc_id}"
+  vpc_cidr               = "${var.vpc_cidr}"
+  ssh_key_s3_bucket      = "${var.bastion_bucket_name}"
+  keys_update_frequency  = "5,20,35,50 * * * *"
+  depends_id             = "${module.vpc.depends_id}"
+  r53_zone_id            = "${var.r53_zone_id}"
+  r53_domain             = "${var.snap_full_fqdn}"
 }
 
 module "bastion" {
