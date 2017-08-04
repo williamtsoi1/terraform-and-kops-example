@@ -73,40 +73,5 @@ data "aws_region" "current" {
   current = true
 }
 
-# resource "null_resource" "kube_config" {
-#   provisioner "local-exec" {
-#     command = <<EOF
-# kops create cluster \
-#     --master-zones ${join(",", var.availability_zones)} \
-#     --zones ${join(",", var.availability_zones)} \
-#     --topology private \
-#     --dns-zone ${var.r53_zone_id} \
-#     --networking calico \
-#     --vpc ${module.vpc.vpc_id} \
-#     --target=terraform \
-#     --out=./kubernetes \
-#     --state s3://${var.snap_full_fqdn}-k8s-state-store \
-#     --name kubernetes.${var.snap_full_fqdn}
-# EOF
-#   }
-# }
 
-# module "kubernetes" {
-#   source = "../../terraform-kubernetes"
-#   cluster_name = "${var.snap_full_fqdn}"
-#   number_of_masters = 3
-#   number_of_nodes = 3
-#   public_subnet_ids = "${module.vpc.public_subnets}"
-#   private_subnet_ids = "${module.vpc.private_subnets}"
-#   availability_zones = "${var.availability_zones}"
-#   master_instance_type = "t2.medium"
-#   node_instance_type = "t2.medium"
-#   ssh_public_key = "${var.ssh_public_key}"
-#   vpc_id = "${module.vpc.vpc_id}"
-#   vpc_cidr = "${var.vpc_cidr}"
-#   r53_zone_id = "${var.r53_zone_id}"
-#   k8s_state_store_bucket_name = "${aws_s3_bucket.k8s_state_store.id}"
-#   igw_id = "${module.vpc.igw_id}"
-#   natgw_ids = "${module.vpc.natgw_ids}"
-# }
 
