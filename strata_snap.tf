@@ -73,5 +73,22 @@ data "aws_region" "current" {
   current = true
 }
 
+output "vpc_id" {
+  value = "${module.vpc.vpc_id}"
+}
 
+output "availability_zones" {
+  value = "${join(",", var.availability_zones)}"
+}
 
+output "r53_zone_id" {
+  value = "${var.r53_zone_id}"
+}
+
+output "snap_full_fqdn" {
+  value = "${var.snap_full_fqdn}"
+}
+
+output "k8s_state_store_bucket_name" {
+  value = "${aws_s3_bucket.k8s_state_store.id}"
+}
