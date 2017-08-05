@@ -24,23 +24,34 @@
 #!/bin/sh
 SNAP_DOMAIN=$(terraform output -module=strata_snap snap_full_fqdn)
 
+# Gives the admin user cluster admin access (on all namespaces)
+kubectl create clusterrolebinding root-cluster-admin-binding --clusterrole=cluster-admin --user=admin
+
 # install dashboard UI
 kubectl create -f https://git.io/kube-dashboard
 
-# install helm to server
-helm init
+# Create Tiller (helm's server-side component) service account, and install Tiller to server.
+kubectl -n kube-system create sa tiller
+kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+helm init --service-account tiller --upgrade
 helm repo update
-# Need to wait until tiller is installed
-sleep 30
 
-# install traefik (ingress controller)
+# Need to wait until tiller is installed
+while [ -z "$(kubectl get pods --namespace kube-system | grep tiller | grep Running)" ]
+do
+    echo Waiting for Tiller pod to be running
+    sleep 5
+done
+echo Tiller pod created
+
+# install traefik as an ingress controller
 helm install --name ingress-controller --namespace kube-system \
   --values traefik-helm-values.yaml stable/traefik
 
-# Wait until traefik & deis workflow ELBs created
+# Wait until traefik ELB created
 while [ -z "$(kubectl describe service ingress-controller-traefik -n kube-system | grep Ingress | awk '{print $3}')" ]
 do
-    echo Waiting for Traefik ELBs to be created
+    echo Waiting for Traefik ELB to be created
     sleep 5
 done
 
@@ -53,7 +64,7 @@ ZONEID=$(terraform output -module=strata_snap r53_zone_id)
 TMPFILE=$(mktemp /tmp/temporary-file.XXXXXXXX)
 cat > ${TMPFILE} << EOF
     {
-      "Comment":"Upserting Deis Workflow and Traefik DNS records",
+      "Comment":"Upserting Traefik DNS records",
       "Changes":[
         {
           "Action":"UPSERT",
@@ -71,10 +82,11 @@ cat > ${TMPFILE} << EOF
     }
 EOF
 
+echo Writing DNS record for *.$SNAP_DOMAIN to $TRAEFIK_ELB_ADDRESS
 aws route53 change-resource-record-sets \
         --hosted-zone-id $ZONEID \
-        --change-batch file://"$TMPFILE"
-
+        --change-batch file://$TMPFILE
+echo DNS Update request sent
 
 # Install spinnaker
 #   helm install --name my-release stable/spinnaker

@@ -60,4 +60,4 @@ accessLogs:
 #  - default
 #  labelSelector:
 rbac:
-  enabled: false
+  enabled: true
