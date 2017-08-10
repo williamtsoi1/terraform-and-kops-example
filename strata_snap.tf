@@ -10,7 +10,6 @@ variable "private_subnets" { type = "list" }
 variable "number_of_cassandra_seeds" { }
 variable "cassandra_instance_type" { }
 variable "cassandra_seed_ips" { type = "list" }
-variable "ssh_public_key" { }
 variable "bastion_bucket_name" { }
 
 # optional variables with defaults
@@ -40,7 +39,6 @@ module "cassandra-seeds" {
   cassandra_seed_ips     = "${var.cassandra_seed_ips}"
   instance_type          = "${var.cassandra_instance_type}"
   private_subnet_ids     = "${module.vpc.private_subnets}"
-  ssh_public_key         = "${var.ssh_public_key}"
   vpc_id                 = "${module.vpc.vpc_id}"
   vpc_cidr               = "${var.vpc_cidr}"
   ssh_key_s3_bucket      = "${var.bastion_bucket_name}"
@@ -56,7 +54,6 @@ module "bastion" {
   public_subnet_ids = "${module.vpc.public_subnets}"
   r53_zone_id = "${var.r53_zone_id}"
   r53_domain = "${var.snap_full_fqdn}"
-  ssh_public_key = "${var.ssh_public_key}"
   stack_name = "${var.environment_name}"
   s3_bucket_name = "${var.bastion_bucket_name}"
   depends_id = "${module.vpc.depends_id}"
