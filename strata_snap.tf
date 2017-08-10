@@ -19,7 +19,7 @@ variable "enable_nat_gateway" { default = "true" }
 variable "map_public_ip_on_launch" { default = "false" }
 
 module "vpc" {
-  source = "github.com/williamtsoi1/tf_aws_vpc?ref=feature%2Fdummy-dependency"
+  source = "github.com/terraform-community-modules/tf_aws_vpc?ref=v1.0.11"
   name = "${var.environment_name}-stratasnap-vpc"
   cidr = "${var.vpc_cidr}"
   private_subnets = "${var.private_subnets}"
@@ -43,7 +43,7 @@ module "cassandra-seeds" {
   vpc_cidr               = "${var.vpc_cidr}"
   ssh_key_s3_bucket      = "${var.bastion_bucket_name}"
   keys_update_frequency  = "5,20,35,50 * * * *"
-  depends_id             = "${module.vpc.depends_id}"
+  depends_id             = "${module.vpc.igw_id} and ${join(",", module.vpc.natgw_ids)}"
   r53_zone_id            = "${var.r53_zone_id}"
   r53_domain             = "${var.snap_full_fqdn}"
 }
@@ -56,7 +56,7 @@ module "bastion" {
   r53_domain = "${var.snap_full_fqdn}"
   stack_name = "${var.environment_name}"
   s3_bucket_name = "${var.bastion_bucket_name}"
-  depends_id = "${module.vpc.depends_id}"
+  depends_id = "${module.vpc.igw_id}"
 }
 
 resource "aws_s3_bucket" "k8s_state_store" {
