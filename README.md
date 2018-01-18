@@ -12,17 +12,17 @@ The purpose of this repository is to simply act as a configuration store, as wel
 This repository is also used to invoke [kops](https://github.com/kubernetes/kops) in order to create a Kubernetes cluster after Terraform is executed, using output paramaters generated from Terraform to serve as inputs to kops.
 
 ## Prerequisites
-- Install [Terraform](http://terraform.io)
-- Install [Terragrunt](https://github.com/gruntwork-io/terragrunt)
-- Install [kops](http://github.com/kubernetes/kops) - a CLI tool used to install a Kubernetes cluster on AWS
-- Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) - the CLI tool to manage a Kubernetes cluster
-- Install [helm](https://helm.sh/) - a package manager for Kubernetes
-- Install [jq] (https://stedolan.github.io/jq/) - a CLI JSON parser
-- Install [aws cli](https://aws.amazon.com/cli/) - a CLI tool to manage AWS resources
-- AWS IAM credentials need to be set up on your environment. This IAM user will need access to the following:
-  - Ability to manage resources as defined in the Terraform template (eg. ec2, vpc, subnet creation)
-  - Access to S3 and DynamoDB in order to access the remote state file and the distributed locks
-
+1. Install the following software on your computer:
+    - [Terraform](http://terraform.io)
+    - [Terragrunt](https://github.com/gruntwork-io/terragrunt)
+    - [kops](http://github.com/kubernetes/kops) - a CLI tool used to install a Kubernetes cluster on AWS
+    - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) - the CLI tool to manage a Kubernetes cluster
+    - [helm](https://helm.sh/) - a package manager for Kubernetes
+    - [jq](https://stedolan.github.io/jq/) - a CLI JSON parser
+    - [aws cli](https://aws.amazon.com/cli/) - a CLI tool to manage AWS resources
+2. AWS IAM credentials need to be set up on your environment. This IAM user will need access to the following:
+    - Ability to manage resources as defined in the Terraform template (eg. ec2, vpc, subnet creation)
+    - Access to S3 and DynamoDB in order to access the remote state file and the distributed locks
 
 ## How to use
 
