@@ -22,7 +22,7 @@
 #   - aws cli
 
 #!/bin/sh
-SNAP_DOMAIN=$(terraform output -module=strata_snap snap_full_fqdn)
+APP_DOMAIN=$(terraform output -module=my_app app_full_fqdn)
 
 # Gives the admin user cluster admin access (on all namespaces)
 kubectl create clusterrolebinding root-cluster-admin-binding --clusterrole=cluster-admin --user=admin
@@ -60,7 +60,7 @@ TRAEFIK_ELB_ZONEID=$(aws elb describe-load-balancers | jq -r '.LoadBalancerDescr
 
 echo Traefik ELB address is $TRAEFIK_ELB_ADDRESS, Zone ID is $TRAEFIK_ELB_ZONEID
 
-ZONEID=$(terraform output -module=strata_snap r53_zone_id)
+ZONEID=$(terraform output -module=my_app r53_zone_id)
 TMPFILE=$(mktemp /tmp/temporary-file.XXXXXXXX)
 cat > ${TMPFILE} << EOF
     {
@@ -69,7 +69,7 @@ cat > ${TMPFILE} << EOF
         {
           "Action":"UPSERT",
           "ResourceRecordSet":{
-            "Name":"*.$SNAP_DOMAIN",
+            "Name":"*.$APP_DOMAIN",
             "Type":"A",
             "AliasTarget": {
               "HostedZoneId": "$TRAEFIK_ELB_ZONEID",
@@ -82,72 +82,11 @@ cat > ${TMPFILE} << EOF
     }
 EOF
 
-echo Writing DNS record for *.$SNAP_DOMAIN to $TRAEFIK_ELB_ADDRESS
+echo Writing DNS record for *.$APP_DOMAIN to $TRAEFIK_ELB_ADDRESS
 aws route53 change-resource-record-sets \
         --hosted-zone-id $ZONEID \
         --change-batch file://$TMPFILE
 echo DNS Update request sent
 
-# install secret for keel.sh
-kubectl create secret docker-registry myregistrykey \
-  --docker-server=https://index.docker.io/v1/ \
-  --docker-username=williamtsoi \
-  --docker-password=wayn3k3r \
-  --docker-email=william@williamtsoi.net
-
-# install keel.sh
-kubectl create clusterrolebinding kubesystem-clusteradmin --clusterrole cluster-admin --serviceaccount=kube-system:default
-helm upgrade --install keel stable/keel --values kubernetes/keel-helm-values.yaml
-
-# Wait until keel ELB created
-while [ -z "$(kubectl describe service keel-keel -n kube-system | grep Ingress | awk '{print $3}')" ]
-do
-    echo Waiting for Keel ELB to be created
-    sleep 5
-done
-KEEL_ELB_ADDRESS=$(kubectl describe service keel-keel -n kube-system | grep Ingress | awk '{print $3}')
-KEEL_ELB_ZONEID=$(aws elb describe-load-balancers | jq -r '.LoadBalancerDescriptions[] | select(.DNSName == $KEEL_ELB_ADDRESS) | .CanonicalHostedZoneNameID' --arg KEEL_ELB_ADDRESS ${KEEL_ELB_ADDRESS})
-
-echo KEEL ELB address is $KEEL_ELB_ADDRESS, Zone ID is $KEEL_ELB_ZONEID
-
-ZONEID=$(terraform output -module=strata_snap r53_zone_id)
-TMPFILE=$(mktemp /tmp/temporary-file.XXXXXXXX)
-cat > ${TMPFILE} << EOF
-    {
-      "Comment":"Upserting KEEL DNS records",
-      "Changes":[
-        {
-          "Action":"UPSERT",
-          "ResourceRecordSet":{
-            "Name":"keel.$SNAP_DOMAIN",
-            "Type":"A",
-            "AliasTarget": {
-              "HostedZoneId": "$KEEL_ELB_ZONEID",
-              "DNSName": "$KEEL_ELB_ADDRESS",
-              "EvaluateTargetHealth": false
-            }
-          }
-        }
-      ]
-    }
-EOF
-
-echo Writing DNS record for keel.$SNAP_DOMAIN to $KEEL_ELB_ADDRESS
-aws route53 change-resource-record-sets \
-        --hosted-zone-id $ZONEID \
-        --change-batch file://$TMPFILE
-echo DNS Update request sent
-
-# Create stratasnap namespace
+# Create app namespace
 kubectl create -f kubernetes/namespace.yaml
-
-# install secret for stratasnap namespace
-kubectl create secret docker-registry myregistrykey \
-  --docker-server=https://index.docker.io/v1/ \
-  --docker-username=williamtsoi \
-  --docker-password=wayn3k3r \
-  --docker-email=william@williamtsoi.net \
-  --namespace stratasnap
-
-# Install spinnaker (back up option should keel.sh doesn't work out)
-#   helm install --name my-release stable/spinnaker

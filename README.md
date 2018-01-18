@@ -1,20 +1,16 @@
-# terraform-stratasnap
-
-This repository is used to manage the infrastructure of stratasnap.
-
-Remote state management is implemented via [Terragrunt](https://github.com/gruntwork-io/terragrunt)
-
+# terraform-and-kops-example
 
 ## Description
 
-The purpose of this repository is to simply act as a configuration store, as well as an orchestrator for other terraform modules (eg. VPC and Cassandra modules). This module should not contain any "business logic" - any infrastructure definitions should be abstracted to their own terraform module (and git repository) and referenced from here.
+The purpose of this repository is to provide a demo of how to use [Terraform](https://www.terraform.io/) in conjunction with [kops](https://github.com/kubernetes/kops/) in order to create a Kubernetes cluster in AWS. This is typically useful when you require base networking infrastructure set up (such as VPC, subnets, routing tables etc), which will be used by both the Kubernetes cluster as well as other workloads that you may require setting up.
 
-This repository is also used to invoke [kops](https://github.com/kubernetes/kops) in order to create a Kubernetes cluster after Terraform is executed, using output paramaters generated from Terraform to serve as inputs to kops.
+While kops has the capability to generate Terraform code, this is suboptimal in this use case because the machine-generated code is not maintainable, and so it is difficult to reference AWS resources created through the machine-generated code for other uses, and this doesn't provide any forward compatibility features that kops provides (such as rolling upgrades).
+
+After provisioning the Kubernetes cluster, a few other useful utilities are also installed into the cluster.
 
 ## Prerequisites
-1. Install the following software on your computer:
+1. Install the following software on your environment:
     - [Terraform](http://terraform.io)
-    - [Terragrunt](https://github.com/gruntwork-io/terragrunt)
     - [kops](http://github.com/kubernetes/kops) - a CLI tool used to install a Kubernetes cluster on AWS
     - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) - the CLI tool to manage a Kubernetes cluster
     - [helm](https://helm.sh/) - a package manager for Kubernetes
@@ -37,18 +33,16 @@ The `environment` folder contains a hierarchy of environments to be managed by t
     │       └── ap-southeast-2
     │           ├── main.tf
     │           └── terraform.tfvars
-    └── strata_snap.tf
+    └── my_app.tf
 
 Create a main.tf and terraform.tfvars as per the example in the test/ap-southeast-2 directory, and supply the appropriate values for your environment. In order to provision the infrastructure, run the following commands:
 
-    cd terraform-stratasnap/test/ap-southeast-2 # substitute the directory name for the environment you've created
-    terragrunt get
-    terragrunt plan
-    terragrunt apply
+    cd environment/test/ap-southeast-2 # substitute the directory name for the environment you've created
+    terraform init
+    terraform plan
+    terraform apply
     ./kops-create-cluster.sh
     ./kubes-post-install.sh
-
-Note: Terragrunt is used to provide a distributed lock to the terraform.tfstate file in s3.
 
 ## What is installed?
 

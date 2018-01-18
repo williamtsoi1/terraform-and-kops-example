@@ -35,7 +35,7 @@ acme:
     size: 1Gi
 dashboard:
   enabled: true
-  domain: traefik.test1.stratasnap.com.au
+  domain: traefik.test1.myapp.com.au
   ingress:
     # annotations:
     #   key: value
